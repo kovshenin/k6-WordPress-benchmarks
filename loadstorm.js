@@ -14,7 +14,7 @@ export const options = {
     // it ramps up to target over 20 minutes
     // then holds at peak (target) for 10 minutes
     stages: [
-        { duration: '20m', target: 700 }, // simulate ramp-up of traffic from 1 to 1000 users over 20 minutes.
+        { duration: '10m', target: 700 }, // simulate ramp-up of traffic from 1 to 1000 users over 20 minutes.
         { duration: '10m', target: 700 }, // stay at max load for 10 minutes
     ],
     ext: {
