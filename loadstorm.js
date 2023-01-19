@@ -9,9 +9,6 @@ import _ from 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.m
 
 
 export const options = {
-    vus: 1,
-    duration: '60s',
-    /*
     // vus, duration - can be replaced with stages
     // the following mimics old Load Storm test
     // it ramps up to target over 20 minutes
@@ -20,7 +17,6 @@ export const options = {
         { duration: '20m', target: 1000 }, // simulate ramp-up of traffic from 1 to 1000 users over 20 minutes.
         { duration: '10m', target: 1000 }, // stay at max load for 10 minutes
     ],
-    */
     ext: {
         //for running k6.io cloud tests
         loadimpact: {
@@ -72,13 +68,13 @@ export function setup () {
         jar: {jar},
     };
 
-    const usernameBase = 'testuser';
+    const usernameBase = 'loadtest';
     //username range is appended to username base if it exists. randomly choosing a number to append within the range to usernameBase
     const usernameRange = {
-                            start: 1,
-                            end: 5,
+                            start: 200,
+                            end: 10200,
                           }
-    const password = 'password';
+    const password = 'izDUGto3sdjmiQXCe3zienWji84F6Q2RVsUnaqg2';
 
     const wpLogin = 'wp-login.php';
 
@@ -116,6 +112,9 @@ export default function (data) {
             data.params.jar.set(siteUrl, key, value, { path: '/' })
         })
     }
+
+    data.params.headers['X-Forwarded-For'] = '89.' + rand(1,250) + '.' + rand(1,250) + '.' + rand(1,250);
+    console.log(data.params);
 
     //add any custom metrics based on the response
     const addResponseMetrics = (response) => {
@@ -249,7 +248,7 @@ export default function (data) {
 
         let user = generateUsername(data.username, data.usernameRange.start, data.usernameRange.end)
 
-        console.log('Username: ' + user)
+        // console.log('Username: ' + user)
 
         let formResponse = http.post(
             `${siteUrl}${data.wplogin}`,
@@ -265,8 +264,8 @@ export default function (data) {
             customParams
 
         )
-        debugObject(customParams,'Custom Login Params')
-        debugObject(formResponse,'Login Form Response',true)
+        // debugObject(customParams,'Custom Login Params')
+        // debugObject(formResponse,'Login Form Response',true)
 
         check(formResponse, isOK)
             || addErrorMetrics()
@@ -319,14 +318,14 @@ export default function (data) {
     let pageCounter = 1;
     data.urls.forEach(url => {
         group('page'+pageCounter, function () {
-            console.log("\r\n\r\nBrowsing page "+ pageCounter + ' | url: ' + url)
+            // console.log("\r\n\r\nBrowsing page "+ pageCounter + ' | url: ' + url)
             //load the page and check the response and log metrics
             let response = http.get(url, data.params)
             check(response, isOK)
                 || addErrorMetrics()
             addResponseMetrics(response)
 
-            debugObject(response,'Page '+pageCounter,true)
+            // debugObject(response,'Page '+pageCounter,true)
 
             //load all secondary assets
             newAssets = findNewAssets(response,assets, data.domainFilter)
